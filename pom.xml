@@ -72,6 +72,7 @@
         <module>base</module>
         <module>core</module>
         <module>ft</module>
+        <module>smoothy</module>
     </modules>
 
     <dependencyManagement>

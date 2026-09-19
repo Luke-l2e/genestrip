@@ -1,0 +1,49 @@
+package org.metagene.genestrip.smoothy;
+
+
+import org.metagene.genestrip.GSCommon;
+import org.metagene.genestrip.GSGoalKey;
+import org.metagene.genestrip.Main;
+
+import java.io.File;
+import java.util.Properties;
+
+/**
+ * Command line entry point for the smoothy extension. Behaves like {@link Main} but builds a
+ * {@link SmoothyMaker} so the smoothy-specific goals are available.
+ *
+ * @param <P> the concrete smoothy project type
+ */
+public abstract class SmoothyMain<P extends SmoothyProject> extends Main<P> {
+    /**
+     * Creates the smoothy command-line launcher.
+     */
+    protected SmoothyMain() {
+    }
+
+    /**
+     * Creates the {@link SmoothyMaker} that provides the FT-specific goals for the given project.
+     *
+     * @param project the smoothy project
+     * @return the smoothy maker for {@code project}
+     */
+    @Override
+    protected SmoothyMaker<P> createMaker(P project) {
+        return new SmoothyMaker<>(project);
+    }
+
+
+    /**
+     * Runs the smoothy extension on the default {@link SmoothyProject} type from the command line.
+     *
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        new SmoothyMain<>() {
+            @Override
+            protected SmoothyProject createProject(GSCommon config, String name, String key, String[] fastqFiles, String csvFile, File csvDir, File fastqResDir, String taxIds, Properties commandLineProps, GSGoalKey forGoal, String dbPath, boolean quietInit) {
+                return new SmoothyProject(config, name, key, fastqFiles, csvFile, csvDir, fastqResDir, taxIds, commandLineProps, forGoal, dbPath, quietInit);
+            }
+        }.parseAndRun(args);
+    }
+}
