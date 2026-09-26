@@ -1,0 +1,20 @@
+digraph regexp {
+rankdir="BT"
+fontname="Helvetica,Arial,sans-serif"
+node [fontname="Helvetica,Arial,sans-serif", style=rounded, shape=box]
+taxtree [label="o:taxtree" style="rounded, dashed"];
+taxnodes [label="o:taxnodes" style="rounded, dashed"];
+categories [label="o:categories" style="rounded, dashed"];
+refseqfna [label="d:refseqfna" style="rounded, dashed"];
+accmap [label="o:accmap" style="rounded, dashed"];
+addfastas [label="o:addfastas" style="rounded, dashed"];
+loaddb [label="o:loaddb" style="rounded, dashed"];
+kmergenomepathcounts [label="o:kmergenomepathcounts"];
+kmergenomepathcounts -> accmap [style=dotted];
+kmergenomepathcounts -> loaddb [style=dotted];
+kmergenomepathcounts -> taxtree [style=dotted];
+kmergenomepathcounts -> categories [style=dotted];
+kmergenomepathcounts -> taxnodes [style=dotted];
+kmergenomepathcounts -> refseqfna;
+kmergenomepathcounts -> addfastas [style=dotted];
+}
