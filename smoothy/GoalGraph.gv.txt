@@ -10,6 +10,7 @@ accmap [label="o:accmap" style="rounded, dashed"];
 addfastas [label="o:addfastas" style="rounded, dashed"];
 loaddb [label="o:loaddb" style="rounded, dashed"];
 kmergenomepathcounts [label="o:kmergenomepathcounts"];
+kmergenomepathcountscsv [label="f:kmergenomepathcountscsv" style="bold"];
 kmergenomepathcounts -> accmap [style=dotted];
 kmergenomepathcounts -> loaddb [style=dotted];
 kmergenomepathcounts -> taxtree [style=dotted];
@@ -17,4 +18,6 @@ kmergenomepathcounts -> categories [style=dotted];
 kmergenomepathcounts -> taxnodes [style=dotted];
 kmergenomepathcounts -> refseqfna;
 kmergenomepathcounts -> addfastas [style=dotted];
+kmergenomepathcountscsv -> kmergenomepathcounts [style=dotted];
+kmergenomepathcountscsv -> loaddb [style=dotted];
 }

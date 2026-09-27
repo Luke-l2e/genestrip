@@ -92,7 +92,9 @@ public class KMerGenomePathCountsGoalTest {
 
     /**
      * Every k-mer occurrence is tallied at the right index: unique ones at the genome, shared ones at
-     * the lowest common ancestor of the two genomes, repeats once per occurrence.
+     * the lowest common ancestor of the two genomes, repeats once per occurrence. The CSV file of
+     * {@link KMerGenomePathCountsCSVGoal} is checked against the same counts here, since it needs the
+     * same database and a maker of its own would cost another pass over the RefSeq catalog.
      */
     @Test
     public void countsMatchBruteForce() throws IOException {
@@ -101,11 +103,54 @@ public class KMerGenomePathCountsGoalTest {
             SmallTaxTree tree = getDatabase(maker).getTaxTree();
             SmallTaxIdNode g1 = genomeNode(tree, DENV1, G1_KEY);
             SmallTaxIdNode g2 = genomeNode(tree, DENV2, G2_KEY);
+            Map<String, long[]> counts = getCounts(maker);
 
-            assertExpectedCounts(tree, g1, g2, getCounts(maker));
+            assertExpectedCounts(tree, g1, g2, counts);
+            assertCsvMatches(maker, tree, counts);
         } finally {
             maker.dumpAll();
         }
+    }
+
+    /**
+     * The CSV file holds one row per genome and path position, with the goal's count, the node at that
+     * position, and a share that is the count over the genome's total.
+     */
+    @SuppressWarnings("unchecked")
+    private static void assertCsvMatches(SmoothyMaker<SmoothyProject> maker, SmallTaxTree tree,
+                                         Map<String, long[]> counts) throws IOException {
+        KMerGenomePathCountsCSVGoal<SmoothyProject> csvGoal = (KMerGenomePathCountsCSVGoal<SmoothyProject>) maker
+                .getGoal(SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_CSV);
+        csvGoal.cleanThis();
+        csvGoal.make();
+        List<String> lines = Files.readAllLines(csvGoal.getFiles().get(0).toPath(), StandardCharsets.UTF_8);
+
+        assertEquals("genome taxid;genome name;position;node taxid;node name;node rank;kmers;share;", lines.get(0));
+        int expectedRows = 0;
+        for (long[] c : counts.values()) {
+            expectedRows += c.length;
+        }
+        assertEquals(expectedRows, lines.size() - 1);
+
+        Map<String, Double> shareSums = new HashMap<>();
+        for (String line : lines.subList(1, lines.size())) {
+            String[] cols = line.split(";", -1);
+            String genomeTaxId = cols[0];
+            int position = Integer.parseInt(cols[2]);
+            long[] genomeCounts = counts.get(genomeTaxId);
+            assertNotNull("Unknown genome " + genomeTaxId, genomeCounts);
+            assertEquals(tree.getNodeByTaxId(genomeTaxId).getName(), cols[1]);
+            assertEquals(pathToRoot(tree.getNodeByTaxId(genomeTaxId)).get(position).getTaxId(), cols[3]);
+            assertEquals(genomeCounts[position], Long.parseLong(cols[6]));
+            if (!cols[7].isEmpty()) {
+                shareSums.merge(genomeTaxId, Double.parseDouble(cols[7]), Double::sum);
+            }
+        }
+        // Every genome with k-mers in the database has a distribution summing to one over its path.
+        for (Map.Entry<String, Double> e : shareSums.entrySet()) {
+            assertEquals(e.getKey(), 1.0, e.getValue(), 1e-6);
+        }
+        assertTrue(shareSums.size() >= 2);
     }
 
     /**
