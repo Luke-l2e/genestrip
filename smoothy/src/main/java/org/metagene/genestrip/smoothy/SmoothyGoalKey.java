@@ -17,7 +17,12 @@ public enum SmoothyGoalKey implements GoalKey {
      * own node up to the root.
      */
     @MDDescription("Counts, per genome, the *k*-mer occurrences the database holds at every node from the genome's own node up to the root.")
-    KMER_GENOME_PATH_COUNTS("kmergenomepathcounts");
+    KMER_GENOME_PATH_COUNTS("kmergenomepathcounts"),
+    /**
+     * Writes the counts of {@link #KMER_GENOME_PATH_COUNTS} and the resulting shares p(n | m) to a CSV file.
+     */
+    @MDDescription("Write the counts from `kmergenomepathcounts` to a CSV file, one row per genome and node on its path to the root, together with the share of the genome's *k*-mers held at that node.")
+    KMER_GENOME_PATH_COUNTS_CSV("kmergenomepathcountscsv", true);
 
     private final boolean forUser;
     private final String name;

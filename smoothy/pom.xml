@@ -13,8 +13,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <!--        <maven.compiler.target>24</maven.compiler.target>-->
         <licensedir>${maven.multiModuleProjectDirectory}</licensedir>
         <main.class>org.metagene.genestrip.smoothy.SmoothyMain</main.class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,5 +38,71 @@
         </dependency>
     </dependencies>
 
-
+    <!-- Packaged as ft is: an executable jar with all dependencies, copied to lib/smoothy.jar for
+         bin/smoothy.sh. A name of its own, so that building smoothy never replaces ft's lib/genestrip.jar. -->
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${licensedir}</directory>
+                <includes>
+                    <include>LICENSE.txt</include>
+                </includes>
+                <targetPath>META-INF</targetPath>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>${main.class}</mainClass>
+                            <addDefaultImplementationEntries>
+                                true
+                            </addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.7.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>all</classifier>
+                            <mainClass>${main.class}</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${project.build.directory}/${project.build.finalName}-all.jar</sourceFile>
+                            <destinationFile>${maven.multiModuleProjectDirectory}/lib/smoothy.jar</destinationFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
