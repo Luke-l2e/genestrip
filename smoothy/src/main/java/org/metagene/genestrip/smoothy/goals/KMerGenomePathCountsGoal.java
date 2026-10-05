@@ -152,37 +152,6 @@ public class KMerGenomePathCountsGoal<P extends SmoothyProject> extends FastaRea
     }
 
     /**
-     * Returns the node the database build filed a genome at, given the node its accession names. A copy
-     * of {@code ReworkingStoreFastaReader.foldUp()}, which core keeps package-private: it walks up to
-     * the first ancestor of rank {@code below}, never past it, and only if that ancestor is requested.
-     * The two must stay in step, or the goal looks for genomes where the build did not put them.
-     *
-     * @param node     the node the accession resolved to
-     * @param below    the rank the build folded to, or {@code null} for no folding
-     * @param taxNodes the requested tax nodes, empty for no restriction
-     * @return the node the genome was filed at
-     */
-    static TaxIdNode foldUp(TaxIdNode node, Rank below, Set<TaxIdNode> taxNodes) {
-        if (below == null || node == null) {
-            return node;
-        }
-        for (TaxIdNode n = node; n != null; n = n.getParent()) {
-            Rank rank = n.getRank();
-            if (rank == null || !rank.isComparableTo(below)) {
-                continue;
-            }
-            if (rank == below) {
-                return taxNodes == null || taxNodes.isEmpty() || taxNodes.contains(n) ? n : node;
-            }
-            if (rank.isAbove(below)) {
-                // Past the rank asked for without having met it.
-                return node;
-            }
-        }
-        return node;
-    }
-
-    /**
      * FASTA reader that, for each k-mer of a contig, looks the k-mer up in the database and tallies it
      * against the current contig's genome, at the position along the genome's own path the stored node
      * sits at.
@@ -245,7 +214,7 @@ public class KMerGenomePathCountsGoal<P extends SmoothyProject> extends FastaRea
             }
             // The build filed the genome under the folded node, not the one the accession names: with
             // foldTaxaBelow set, the latter is typically not even in the database's tree.
-            TaxIdNode filedAt = foldUp(node, foldTaxaBelow, taxNodes);
+            TaxIdNode filedAt = ReworkingStoreFastaReader.foldUp(node, foldTaxaBelow, taxNodes);
             SmallTaxIdNode n = taxTree.getNodeByTaxId(filedAt.getTaxId());
             if (n == null) {
                 return;
