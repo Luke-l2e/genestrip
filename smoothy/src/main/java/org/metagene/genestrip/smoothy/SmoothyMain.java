@@ -3,18 +3,18 @@ package org.metagene.genestrip.smoothy;
 
 import org.metagene.genestrip.GSCommon;
 import org.metagene.genestrip.GSGoalKey;
-import org.metagene.genestrip.Main;
+import org.metagene.genestrip.finertree.FinerTreeMain;
 
 import java.io.File;
 import java.util.Properties;
 
 /**
- * Command line entry point for the smoothy extension. Behaves like {@link Main} but builds a
- * {@link SmoothyMaker} so the smoothy-specific goals are available.
+ * Command line entry point for the smoothy extension. Behaves like {@link FinerTreeMain} but builds a
+ * {@link SmoothyMaker} so the finer-tree and smoothy-specific goals are available.
  *
  * @param <P> the concrete smoothy project type
  */
-public abstract class SmoothyMain<P extends SmoothyProject> extends Main<P> {
+public abstract class SmoothyMain<P extends SmoothyProject> extends FinerTreeMain<P> {
     /**
      * Creates the smoothy command-line launcher.
      */
@@ -22,7 +22,7 @@ public abstract class SmoothyMain<P extends SmoothyProject> extends Main<P> {
     }
 
     /**
-     * Creates the {@link SmoothyMaker} that provides the FT-specific goals for the given project.
+     * Creates the {@link SmoothyMaker} that provides the finer-tree and smoothy-specific goals for the given project.
      *
      * @param project the smoothy project
      * @return the smoothy maker for {@code project}

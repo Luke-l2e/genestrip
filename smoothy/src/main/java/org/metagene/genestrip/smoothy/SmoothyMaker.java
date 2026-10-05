@@ -1,7 +1,7 @@
 package org.metagene.genestrip.smoothy;
 
 import org.metagene.genestrip.GSGoalKey;
-import org.metagene.genestrip.GSMaker;
+import org.metagene.genestrip.finertree.FinerTreeMaker;
 import org.metagene.genestrip.goals.refseq.RefSeqFnaFilesDownloadGoal;
 import org.metagene.genestrip.make.ObjectGoal;
 import org.metagene.genestrip.refseq.AccessionMap;
@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-public class SmoothyMaker<P extends SmoothyProject> extends GSMaker<P> {
+public class SmoothyMaker<P extends SmoothyProject> extends FinerTreeMaker<P> {
     /**
      * Creates a smoothy maker for the given project.
      *
@@ -27,7 +27,7 @@ public class SmoothyMaker<P extends SmoothyProject> extends GSMaker<P> {
     }
 
     /**
-     * Registers the standard Genestrip goals and additionally the smoothy-specific ones.
+     * Registers the standard Genestrip and finer-tree goals and additionally the smoothy-specific ones.
      */
     @Override
     protected void createGoals() {
