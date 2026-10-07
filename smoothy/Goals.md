@@ -2,3 +2,4 @@
 |---------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `kmergenomepathcounts`    |           | Counts, per genome, the *k*-mer occurrences the database holds at every node from the genome's own node up to the root.                                                              |
 | `kmergenomepathcountscsv` | X         | Write the counts from `kmergenomepathcounts` to a CSV file, one row per genome and node on its path to the root, together with the share of the genome's *k*-mers held at that node. |
+| `kmergenomepathcountsser` | X         | Write the counts from `kmergenomepathcounts` to a serialized Java object file: a map from each genome's tax id to its *k*-mer counts along its path to the root.                     |

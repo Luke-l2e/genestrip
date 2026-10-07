@@ -22,7 +22,12 @@ public enum SmoothyGoalKey implements GoalKey {
      * Writes the counts of {@link #KMER_GENOME_PATH_COUNTS} and the resulting shares p(n | m) to a CSV file.
      */
     @MDDescription("Write the counts from `kmergenomepathcounts` to a CSV file, one row per genome and node on its path to the root, together with the share of the genome's *k*-mers held at that node.")
-    KMER_GENOME_PATH_COUNTS_CSV("kmergenomepathcountscsv", true);
+    KMER_GENOME_PATH_COUNTS_CSV("kmergenomepathcountscsv", true),
+    /**
+     * Writes the counts of {@link #KMER_GENOME_PATH_COUNTS} to a serialized Java object file.
+     */
+    @MDDescription("Write the counts from `kmergenomepathcounts` to a serialized Java object file: a map from each genome's tax id to its *k*-mer counts along its path to the root.")
+    KMER_GENOME_PATH_COUNTS_SER("kmergenomepathcountsser", true);
 
     private final boolean forUser;
     private final String name;

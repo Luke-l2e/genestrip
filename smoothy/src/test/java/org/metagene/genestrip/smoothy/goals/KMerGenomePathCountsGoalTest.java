@@ -107,6 +107,7 @@ public class KMerGenomePathCountsGoalTest {
 
             assertExpectedCounts(tree, g1, g2, counts);
             assertCsvMatches(maker, tree, counts);
+            assertSerMatches(maker, counts);
         } finally {
             maker.dumpAll();
         }
@@ -151,6 +152,27 @@ public class KMerGenomePathCountsGoalTest {
             assertEquals(e.getKey(), 1.0, e.getValue(), 1e-6);
         }
         assertTrue(shareSums.size() >= 2);
+    }
+
+    /**
+     * The SER file reads back as exactly the goal's counts.
+     */
+    private static void assertSerMatches(SmoothyMaker<SmoothyProject> maker, Map<String, long[]> counts)
+            throws IOException {
+        KMerGenomePathCountsSERGoal<SmoothyProject> serGoal = (KMerGenomePathCountsSERGoal<SmoothyProject>) maker
+                .getGoal(SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_SER);
+        serGoal.cleanThis();
+        serGoal.make();
+        Map<String, long[]> loaded;
+        try {
+            loaded = KMerGenomePathCountsSERGoal.load(serGoal.getFiles().get(0));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(counts.keySet(), loaded.keySet());
+        for (String taxId : counts.keySet()) {
+            assertArrayEquals(taxId, counts.get(taxId), loaded.get(taxId));
+        }
     }
 
     /**

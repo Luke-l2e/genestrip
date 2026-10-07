@@ -8,6 +8,7 @@ import org.metagene.genestrip.refseq.AccessionMap;
 import org.metagene.genestrip.refseq.RefSeqCategory;
 import org.metagene.genestrip.smoothy.goals.KMerGenomePathCountsCSVGoal;
 import org.metagene.genestrip.smoothy.goals.KMerGenomePathCountsGoal;
+import org.metagene.genestrip.smoothy.goals.KMerGenomePathCountsSERGoal;
 import org.metagene.genestrip.store.Database;
 import org.metagene.genestrip.tax.TaxNodeSelection;
 import org.metagene.genestrip.tax.TaxTree;
@@ -53,5 +54,9 @@ public class SmoothyMaker<P extends SmoothyProject> extends FinerTreeMaker<P> {
                 SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_CSV, kmerGenomePathCountsGoal, dbGoal,
                 getGoal(GSGoalKey.SETUP));
         registerGoal(kmerGenomePathCountsCSVGoal);
+
+        KMerGenomePathCountsSERGoal<P> kmerGenomePathCountsSERGoal = new KMerGenomePathCountsSERGoal<>(project,
+                SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_SER, kmerGenomePathCountsGoal, getGoal(GSGoalKey.SETUP));
+        registerGoal(kmerGenomePathCountsSERGoal);
     }
 }
