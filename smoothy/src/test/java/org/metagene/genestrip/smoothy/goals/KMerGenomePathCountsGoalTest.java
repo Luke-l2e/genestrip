@@ -117,7 +117,6 @@ public class KMerGenomePathCountsGoalTest {
      * The CSV file holds one row per genome and path position, with the goal's count, the node at that
      * position, and a share that is the count over the genome's total.
      */
-    @SuppressWarnings("unchecked")
     private static void assertCsvMatches(SmoothyMaker<SmoothyProject> maker, SmallTaxTree tree,
                                          Map<String, long[]> counts) throws IOException {
         KMerGenomePathCountsCSVGoal<SmoothyProject> csvGoal = (KMerGenomePathCountsCSVGoal<SmoothyProject>) maker

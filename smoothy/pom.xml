@@ -59,6 +59,15 @@
             </resource>
         </resources>
         <plugins>
+            <!-- Java 10 as in core and ft, which smoothy builds on and so needs at runtime anyway. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>10</source>
+                    <target>10</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

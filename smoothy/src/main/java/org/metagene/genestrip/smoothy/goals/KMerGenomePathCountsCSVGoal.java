@@ -25,6 +25,7 @@
 package org.metagene.genestrip.smoothy.goals;
 
 import org.metagene.genestrip.GSProject;
+import org.metagene.genestrip.io.StreamProvider;
 import org.metagene.genestrip.make.FileGoal;
 import org.metagene.genestrip.make.Goal;
 import org.metagene.genestrip.make.GoalKey;
@@ -106,7 +107,7 @@ public class KMerGenomePathCountsCSVGoal<P extends SmoothyProject> extends FileG
         Map<String, long[]> counts = pathCountsGoal.get();
         SmallTaxTree taxTree = dbGoal.get().getTaxTree();
 
-        try (PrintStream ps = new PrintStream(file, StandardCharsets.UTF_8.name())) {
+        try (PrintStream ps = new PrintStream(StreamProvider.getOutputStreamForFile(file), false, StandardCharsets.UTF_8)) {
             ps.println("genome taxid;genome name;position;node taxid;node name;node rank;kmers;share;");
             for (SmallTaxIdNode genome : taxTree) {
                 long[] genomeCounts = counts.get(genome.getTaxId());
