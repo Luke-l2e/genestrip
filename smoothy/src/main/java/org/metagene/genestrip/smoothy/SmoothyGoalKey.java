@@ -27,7 +27,25 @@ public enum SmoothyGoalKey implements GoalKey {
      * Writes the counts of {@link #KMER_GENOME_PATH_COUNTS} to a serialized Java object file.
      */
     @MDDescription("Write the counts from `kmergenomepathcounts` to a serialized Java object file: a map from each genome's tax id to its *k*-mer counts along its path to the root.")
-    KMER_GENOME_PATH_COUNTS_SER("kmergenomepathcountsser", true);
+    KMER_GENOME_PATH_COUNTS_SER("kmergenomepathcountsser", true),
+    /**
+     * Supplies the counts of {@link #KMER_GENOME_PATH_COUNTS}, from memory or from the file of
+     * {@link #KMER_GENOME_PATH_COUNTS_SER}.
+     */
+    @MDDescription("Load the counts written by `kmergenomepathcountsser`, or take those of `kmergenomepathcounts` if they have just been counted, after checking that they belong to the project's database.")
+    LOAD_KMER_GENOME_PATH_COUNTS("loadkmergenomepathcounts"),
+    /** Same as {@link #KMER_GENOME_PATH_COUNTS} but for an FT database. */
+    @MDDescription("Same as `kmergenomepathcounts` but for a Genestrip-FT database.")
+    FT_KMER_GENOME_PATH_COUNTS("ftkmergenomepathcounts"),
+    /** Same as {@link #KMER_GENOME_PATH_COUNTS_CSV} but for an FT database. */
+    @MDDescription("Same as `kmergenomepathcountscsv` but for a Genestrip-FT database.")
+    FT_KMER_GENOME_PATH_COUNTS_CSV("ftkmergenomepathcountscsv", true),
+    /** Same as {@link #KMER_GENOME_PATH_COUNTS_SER} but for an FT database. */
+    @MDDescription("Same as `kmergenomepathcountsser` but for a Genestrip-FT database.")
+    FT_KMER_GENOME_PATH_COUNTS_SER("ftkmergenomepathcountsser", true),
+    /** Same as {@link #LOAD_KMER_GENOME_PATH_COUNTS} but for an FT database. */
+    @MDDescription("Same as `loadkmergenomepathcounts` but for a Genestrip-FT database.")
+    LOAD_FT_KMER_GENOME_PATH_COUNTS("loadftkmergenomepathcounts");
 
     private final boolean forUser;
     private final String name;

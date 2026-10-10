@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.metagene.genestrip.GSCommon;
 import org.metagene.genestrip.GSConfigKey;
 import org.metagene.genestrip.GSGoalKey;
+import org.metagene.genestrip.GSProject;
+import org.metagene.genestrip.make.FileGoal;
 import org.metagene.genestrip.make.ObjectGoal;
 import org.metagene.genestrip.smoothy.SmoothyGoalKey;
 import org.metagene.genestrip.smoothy.SmoothyMaker;
@@ -16,7 +18,9 @@ import org.metagene.genestrip.tax.SmallTaxTree;
 import org.metagene.genestrip.tax.SmallTaxTree.SmallTaxIdNode;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -162,12 +166,16 @@ public class KMerGenomePathCountsGoalTest {
                 .getGoal(SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_SER);
         serGoal.cleanThis();
         serGoal.make();
-        Map<String, long[]> loaded;
+        KMerGenomePathCountsSERGoal.StoredPathCounts stored;
         try {
-            loaded = KMerGenomePathCountsSERGoal.load(serGoal.getFiles().get(0));
+            stored = KMerGenomePathCountsSERGoal.load(serGoal.getFiles().get(0));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+        // The file names the database it was measured on.
+        assertNotNull(stored.getDbMD5());
+        assertEquals(getDatabase(maker).getConfigInfo().getProperty(GSProject.DB_MD5), stored.getDbMD5());
+        Map<String, long[]> loaded = stored.getCounts();
         assertEquals(counts.keySet(), loaded.keySet());
         for (String taxId : counts.keySet()) {
             assertArrayEquals(taxId, counts.get(taxId), loaded.get(taxId));
@@ -249,6 +257,76 @@ public class KMerGenomePathCountsGoalTest {
         } finally {
             maker.dumpAll();
         }
+    }
+
+    /**
+     * A new maker - as on the next run from the command line - gets the counts from the SER file,
+     * without counting again, and gets exactly what was counted.
+     */
+    @Test
+    public void loadGoalReadsTheSerFileWithoutCounting() throws IOException {
+        Map<String, long[]> counted;
+        SmoothyMaker<SmoothyProject> maker = new SmoothyMaker<>(createProject("smoothytest", DENV1, DENV2, null, 0));
+        try {
+            FileGoal<SmoothyProject> serGoal = (FileGoal<SmoothyProject>) maker.getGoal(SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_SER);
+            serGoal.cleanThis();
+            // Taken before the SER file is written: once it is, its only dependent is made and
+            // Genestrip frees the counts, so asking for them afterwards would count all over again.
+            counted = getCounts(maker);
+            serGoal.make();
+        } finally {
+            maker.dumpAll();
+        }
+
+        maker = new SmoothyMaker<>(createProject("smoothytest", DENV1, DENV2, null, 0));
+        try {
+            Map<String, long[]> loaded = getLoadedCounts(maker);
+            assertFalse("The load goal must not count again",
+                    maker.getGoal(SmoothyGoalKey.KMER_GENOME_PATH_COUNTS).isMade());
+            assertEquals(counted.keySet(), loaded.keySet());
+            for (String taxId : counted.keySet()) {
+                assertArrayEquals(taxId, counted.get(taxId), loaded.get(taxId));
+            }
+        } finally {
+            maker.dumpAll();
+        }
+    }
+
+    /**
+     * Counts recorded against another database - one rebuilt since - are refused, not used.
+     */
+    @Test
+    public void loadGoalRefusesCountsOfAnotherDatabase() throws IOException {
+        SmoothyMaker<SmoothyProject> maker = new SmoothyMaker<>(createProject("smoothytest", DENV1, DENV2, null, 0));
+        File serFile = ((FileGoal<SmoothyProject>) maker.getGoal(SmoothyGoalKey.KMER_GENOME_PATH_COUNTS_SER)).getFile();
+        String otherMD5 = "00000000000000000000000000000000";
+        try {
+            // The database must exist for the check to have something to compare against.
+            String dbMD5 = getDatabase(maker).getConfigInfo().getProperty(GSProject.DB_MD5);
+            serFile.getParentFile().mkdirs();
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(serFile))) {
+                out.writeObject(otherMD5);
+                out.writeObject(new HashMap<String, long[]>());
+            }
+            try {
+                getLoadedCounts(maker);
+                fail("Counts of another database must be refused");
+            } catch (StalePathCountsException e) {
+                // Checked by what was compared, not by the wording of the message.
+                assertEquals(serFile, e.getCountsFile());
+                assertEquals(otherMD5, e.getCountsMD5());
+                assertEquals(dbMD5, e.getDbMD5());
+            }
+        } finally {
+            maker.dumpAll();
+            // Not to leave a file behind that every later run would refuse.
+            serFile.delete();
+        }
+    }
+
+    private static Map<String, long[]> getLoadedCounts(SmoothyMaker<SmoothyProject> maker) {
+        return ((ObjectGoal<Map<String, long[]>, SmoothyProject>) maker
+                .getGoal(SmoothyGoalKey.LOAD_KMER_GENOME_PATH_COUNTS)).get();
     }
 
     private static void assertExpectedCounts(SmallTaxTree tree, SmallTaxIdNode g1, SmallTaxIdNode g2,
